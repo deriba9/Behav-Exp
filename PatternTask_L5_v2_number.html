@@ -1,0 +1,645 @@
+
+<html>
+
+<head>
+    
+    <meta charset="UTF-8" />
+    <title>Experiment</title>
+    <script src="jspsych.js"></script>
+    <script src="jspsych-html-keyboard-response.js"></script>
+    <script src="jspsych-image-keyboard-response.js"></script>
+    <script src="jspsych-survey-text.js"></script>
+    <script src="jspsych-fullscreen.js"></script>
+    <script src="jspsych-psychophysics.js"></script>
+    <script src="jquery-3.5.1.min.js"></script>
+    <link href="jspsych.css" rel="stylesheet" type="text/css">
+    </link>
+
+    <style>
+
+    </style>
+</head>
+
+<body>
+</body>
+
+<script>
+    // パターン学習課題
+    // wmloadで指定した「色と回答の組み合わせ」を学習していく
+    // 回答キーについて：使用キーはs,d,f,j,k,lの6種
+
+    // 2022.10, 発達障害の方を対象とした実験用
+    // インターバルとかmatlab側と揃える
+    // 試行数は[20 x wmload]とし、セット数を調整し300trialsにする
+
+    
+
+
+
+    var objectmap = [];
+    var timeline = [];
+    
+    const ITI = 500; // 最小のITI
+    const ITIwidth = 1000; // ITIのランダム幅
+    const durstim = 1500; // 色刺激が出る時間の長さ
+    const circler = 30;
+    const durFB = 500;
+
+    var maxtrials = 100;  // これは100で固定（変えると下のnratioと噛み合わない）
+    const wmload = 10; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する // TODO: 2, ..., 11でいいのか確認
+    nratio = [10,10,10,10,10,10,10,10,10,10]; // 各刺激を10回ずつで固定にする（全体の試行数を変える）
+
+    let patterns = new Array(maxtrials).fill(1);
+    for (var ld = 1; ld<wmload+1; ld++) {
+        patterns.fill(ld,sumarray(nratio.slice(0,ld-1)));
+    }
+
+    for (var j = 1; j < maxtrials; j++) {  // NOTE: 元々100という値が置かれていましたが、maxtrialsのことかと思ったので置き換えました
+        for (var i = patterns.length - 1; i > 0; i--) { // 配列のランダマイズ => 全然できてない感がある // TODO: これ修正されているのか確認
+            var r = Math.floor(Math.random() * (i + 1));
+            var tmp = patterns[i];
+            patterns[i] = patterns[r];
+            patterns[r] = tmp;
+        }
+    }
+    
+
+    // patternsに対応する色と回答キーを指定する必要あり
+    let stimlist_numbers = [0,1,2,3,4,5,6,7,8,9]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定
+    let answerlist_numbers = [0,1,2,3,4,5,6,7,8,9];  // NOTE: 候補を10個にしました（5個の時は候補が6個になっていた）
+    
+    // var coloridx = [1,2];
+    let numidx = randomSelect(stimlist_numbers.slice(), wmload);
+    let answerlist = ['v','s','d','f','g','h','j','k','l','n'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
+    let anskeycode = [86,83,68,70,71,72,74,75,76,78];
+    // var answeridx = [1,2];
+    let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
+    
+
+    const stimlist = [0,1,2,3,4,5,6,7,8,9];  // TODO: 0 - 9 の10個の数字を表示してるが、1 - 10でもいいかも
+    // これ動作する？ // 14種の色
+    // colorlist[coloridx(patterns(tr))]
+
+    // const graycol = '#c0c0c0';
+    const bgcol = '#ffffff';
+    // const stimcol = '#c40000';
+    // const probcol = '#00c462';
+
+    const cwidth = 1200;
+    const cheight = 800;
+    const xgap = 300;
+    const ygap = 80;
+    const leftx = cwidth / 2 - xgap;
+    const rightx = cwidth / 2 + xgap;
+    
+    // var answers = [];
+    var corarray = [];
+    var rts = [];
+
+    var intrvls = [];
+    var answ = [];
+    var cornow = 'test';
+
+    var nexttext = {
+        obj_type: 'text',
+        content: cornow,
+        startX: cwidth / 2,
+        startY: 80,
+        font: "40px Arial",
+    }
+
+
+        
+
+    // objectmap作成：今後繰り返し使用
+    // for (let i=1; i<7; i++) { //変更点5->7
+    //     var circle_objnow = {
+    //         obj_type: 'circle',
+    //         startX: (4+i)*cwidth/15, //変更点5->4
+    //         startY: cheight/2,
+    //         radius: circler,
+    //         line_color: graycol,
+    //         fill_color: graycol
+    //     }
+    //     objectmap.push(circle_objnow);
+    // }
+    // objectmap完成
+    
+    
+
+
+
+
+
+
+    // trialを作成しtimelineにpushしていく
+    timeline.push({
+        type: 'fullscreen',
+        fullscreen_mode: true
+    });
+
+    // まずタイトル
+    var titleobj = {
+        type: 'html-keyboard-response',
+        stimulus: '<p>Experiment</p><p>Press "]" key to start</p>',
+        choices: ']'
+    }
+    timeline.push(titleobj);
+
+    var survey_trial = {
+        type: 'survey-text',
+        questions: [
+            { prompt: "ID : " },
+            { prompt: "Set : ", placeholder: "If this is practice, input 0" }
+        ],
+    };
+    timeline.push(survey_trial);
+
+
+/////////////////////////////////////////////////////////////////  PRACTICE  START  ////////////////////////////////////////////////////////////////
+
+    // Practice STARTの表示
+    var trialtext = {
+        obj_type: 'text',
+        content: 'PRACTICE START',
+        startX: cwidth / 2,
+        startY: 80,
+        font: "40px Arial",
+    }
+    var trial = {
+        type: 'psychophysics',
+        stimuli: objectmap.concat(trialtext),
+        choices: jsPsych.NO_KEYS,
+        canvas_width: cwidth,
+        canvas_height: cheight,
+        background_color: bgcol,
+        trial_duration: 3000
+    }
+    timeline.push(trial);
+
+    // 以下繰り返し
+    for (let tr = 1; tr <= answerlist_numbers.length; tr++) {
+        // Practice番号を表示するオブジェクト
+        var trialtext = {
+            obj_type: 'text',
+            content: 'Practice ' + String(tr),
+            startX: cwidth / 2,
+            startY: 80,
+            font: "40px Arial",
+        }
+
+        // map+practice番号
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext),
+            choices: jsPsych.NO_KEYS,
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: function(){
+                var ITInow = ITI + Math.random()*ITIwidth;
+                return ITInow;
+            }
+        }
+        timeline.push(trial);
+
+
+        var stimnumber = {
+            obj_type: 'text',
+            startX: cwidth / 2,
+            startY: cheight / 2,
+            content: String(stimlist[tr-1]),
+            font: "40px Arial",
+        }
+
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext).concat(stimnumber),//stimcircle,//trialtext.concat(stimcircle),
+            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: durstim,
+            on_finish: function(){
+                var rtnow = jsPsych.data.get().select('rt').values; // これって無回答の場合はどうなる？ => nullだな
+                // console.log(rtnow[rtnow.length - 1]);
+            }
+        }
+        timeline.push(trial);
+        // timeline.push(stimcircle);
+        // ここの解答をどう扱うか・・・
+        // 次のtimelineのdurationを関数として設定すればいいか？
+        // 上記で既に回答が得られている場合はduration=0とする、という感じで
+
+        // 次に本試行の正解の文字を画面中央に表示
+        var ansletter = {
+            obj_type: 'text',
+            content: answerlist[tr-1],
+            startX: cwidth / 2,
+            startY: cheight / 2,
+            font: "40px Arial",
+        }
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext).concat(ansletter),//stimcircle,//trialtext.concat(stimcircle),
+            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: function(){
+                var rtnow = jsPsych.data.get().select('rt').values;
+                rtlast = rtnow[rtnow.length - 1];
+                if(rtlast == null){
+                    // 無回答の場合
+                    return null; // 解答を待つ
+                }else{
+                    return 0;
+                }
+            }, // ここを関数で決定すればよい
+            
+        }
+        timeline.push(trial);
+
+    }
+
+    // Practice END
+    var trialtext = {
+        obj_type: 'text',
+        content: 'PRACTICE END',
+        startX: cwidth / 2,
+        startY: 80,
+        font: "40px Arial",
+    }
+    var trial = {
+        type: 'psychophysics',
+        stimuli: objectmap.concat(trialtext),
+        choices: jsPsych.NO_KEYS,
+        canvas_width: cwidth,
+        canvas_height: cheight,
+        background_color: bgcol,
+        trial_duration: 3000
+    }
+    timeline.push(trial);
+
+
+/////////////////////////////////////////////////////////////  PRACTICE  END  //////////////////////////////////////////////////////////////
+    
+
+    // STARTの表示
+    var trialtext = {
+        obj_type: 'text',
+        content: 'START',
+        startX: cwidth / 2,
+        startY: 80,
+        font: "40px Arial",
+    }
+    var trial = {
+        type: 'psychophysics',
+        stimuli: objectmap.concat(trialtext),
+        choices: jsPsych.NO_KEYS,
+        canvas_width: cwidth,
+        canvas_height: cheight,
+        background_color: bgcol,
+        trial_duration: 3000
+    }
+    timeline.push(trial);
+
+    
+
+
+    // 以下繰り返し・map+トライアル番号・・・map+stim1+トライアル番号・・・map+stim2+トライアル番号・・・map+トライアル番号・・・map+Probe・・・After answer
+    for (let tr = 1; tr <= maxtrials; tr++) {
+        // トライアル番号を表示するオブジェクト
+        var trialtext = {
+            obj_type: 'text',
+            content: 'Trial ' + String(tr),
+            startX: cwidth / 2,
+            startY: 80,
+            font: "40px Arial",
+        }
+
+        // map+トライアル番号
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext),
+            choices: jsPsych.NO_KEYS,
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: function(){
+                var ITInow = ITI + Math.random()*ITIwidth;
+                return ITInow;
+            }
+        }
+        timeline.push(trial);
+
+
+        // stim+トライアル番号
+        // ここでpatternsに応じた座標指定？
+        // 以下修正
+        // その後for文で刺激を呈示していく
+        // sdf,jklは83,68,70,74,75,76（キーコード）x
+
+        var stimnumber = {
+            obj_type: 'text',
+            startX: cwidth / 2,
+            startY: cheight / 2,
+            content: String(stimlist[numidx[patterns[tr-1]-1]]),
+            font: "40px Arial",
+        }
+
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext).concat(stimnumber),//stimcircle,//trialtext.concat(stimcircle),
+            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: durstim,
+            on_finish: function(){
+                var rtnow = jsPsych.data.get().select('rt').values; // これって無回答の場合はどうなる？ => nullだな
+                // console.log(rtnow[rtnow.length - 1]);
+            }
+        }
+        timeline.push(trial);
+        // timeline.push(stimcircle);
+        // ここの解答をどう扱うか・・・
+        // 次のtimelineのdurationを関数として設定すればいいか？
+        // 上記で既に回答が得られている場合はduration=0とする、という感じで
+
+        // 次に本試行の正解の文字を画面中央に表示
+        var ansletter = {
+            obj_type: 'text',
+            content: answerlist[answeridx[patterns[tr-1]-1]],
+            startX: cwidth / 2,
+            startY: cheight / 2,
+            font: "40px Arial",
+        }
+        var trial = {
+            type: 'psychophysics',
+            stimuli: objectmap.concat(trialtext).concat(ansletter),//stimcircle,//trialtext.concat(stimcircle),
+            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: function(){
+                var rtnow = jsPsych.data.get().select('rt').values;
+                rtlast = rtnow[rtnow.length - 1];
+                if(rtlast == null){
+                    // 無回答の場合
+                    return null; // 解答を待つ
+                }else{
+                    return 0;
+                }
+            }, // ここを関数で決定すればよい
+            
+        }
+        timeline.push(trial);
+
+        // 正解不正解のFB
+        // 正解は青文字・不正解は赤文字
+        // 試しにFBをGOOD / WRONGにしてみる => 干渉が起きやすいかも？
+        var trial = {
+            type: 'psychophysics',
+            stimuli: function () {
+                // var keynow = jsPsych.data.get().select('response').values;
+                var keynow = jsPsych.data.get().select('key_press').values;
+                // console.log(keynow);
+                // keynow = keynow.filter(Boolean);
+                // NOTE: [(null), space, character]という順にキーストロークがあることを前提に下のような実装にしましたが、キーを２連続押されたりすることに対して脆弱です
+                keynow = [keynow[keynow.length - 3],keynow[keynow.length - 2],keynow[keynow.length - 1]]; // 直近の3つのどちらか
+                var rtnow = jsPsych.data.get().select('rt').values;
+                // NOTE: rtnowはスペースが押された時間を含む情報を、keynowは押された文字（s, f, gなど）を格納しているつもりで以下の実装になっています。
+                if(keynow[0]==null){ // 解答表示中に回答した場合 　// NOTE: keynow = [null, 32, 文字のキーコード]となっていると想定
+                    rtnow = rtnow[rtnow.length - 2] + durstim; // この時点でdurstimを足しておく  // NOTE: space (32) が押されたタイミングを取得
+                    keynow = keynow[2];  // NOTE: 文字コードを取得
+                }else{  // NOTE: keynow = [32, 文字のキーコード, 何らかのキー]となっていると想定
+                    rtnow = rtnow[rtnow.length - 3];  // NOTE: space (32) が押されたタイミングを取得
+                    keynow = keynow[1];  // NOTE: 文字コードを取得
+                }
+                rts.push(rtnow);
+                // TODO: rtnowの理解が合っているのか要確認　
+
+                
+                ansnow = anskeycode[answeridx[patterns[tr-1]-1]];
+                if (ansnow == keynow){
+                    cornow = 1;
+                    txcol = '#0000ff';
+                    corarray.push(1);
+
+
+                }else{
+                    cornow = 0;
+                    txcol = '#ff0000';
+                    corarray.push(0);
+                }
+                var FBletter = {
+                    obj_type: 'text',
+                    content: answerlist[answeridx[patterns[tr-1]-1]],
+                    startX: cwidth / 2,
+                    startY: cheight / 2,
+                    font: "40px Arial",
+                    text_color: txcol
+                }
+                
+               /*
+                ansnow = anskeycode[answeridx[patterns[tr-1]-1]];
+                if (ansnow == keynow){
+                    cornow = 1;
+                    txcol = '#000000';
+                    corarray.push(1);
+                    fbtxt = 'GOOD';
+                }else{
+                    cornow = 0;
+                    txcol = '#000000';
+                    corarray.push(1);
+                    fbtxt = 'WRONG';
+                }
+                var FBletter = {
+                    obj_type: 'text',
+                    content: fbtxt,
+                    startX: cwidth / 2,
+                    startY: cheight / 2,
+                    font: "40px Arial",
+                    text_color: txcol
+                }
+                */
+
+
+                var trialtext = {
+                    obj_type: 'text',
+                    content: 'Trial ' + String(corarray.length),
+                    startX: cwidth / 2,
+                    startY: 80,
+                    font: "40px Arial",
+                }
+
+                return objectmap.concat(trialtext).concat(FBletter);
+            },
+            //objectmap.concat(trialtext).concat(FBletter),//stimcircle,//trialtext.concat(stimcircle),
+            choices: jsPsych.NO_KEYS,
+            canvas_width: cwidth,
+            canvas_height: cheight,
+            background_color: bgcol,
+            trial_duration: durFB,
+        }
+        timeline.push(trial);
+
+
+
+
+
+
+
+
+
+    }
+
+    // After finish
+    // map+トライアル番号
+    var trial = {
+        type: 'psychophysics',
+        stimuli: trialtext,
+        choices: jsPsych.NO_KEYS,
+        canvas_width: cwidth,
+        canvas_height: cheight,
+        background_color: bgcol,
+        trial_duration: ITI
+    }
+    timeline.push(trial);
+
+    var trial = {
+        type: 'html-keyboard-response',
+        stimulus: '<p>Finish!</p><p>Thank you for your cooperation</p><p>Press "]" to end</p>',
+        choices: "]"
+    }
+    timeline.push(trial);
+
+    // exit fullscreen mode
+    timeline.push({
+        type: 'fullscreen',
+        fullscreen_mode: false
+    });
+
+    /*
+    jsPsych.init({
+        timeline: timeline,
+        on_finish: saveData//function () { jsPsych.data.displayData(); }
+    });
+    */
+
+
+    // ========== 関数群 ========== //
+    function saveData(name, data) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'save_data.php'); // 'write_data.php' is the path to the php file described above.
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify({ filename: name, filedata: data }));
+    }
+
+    function sumarray(nums) {
+	    var total = 0;
+	    for (var i = 0, len = nums.length; i < len; i++) total += nums[i];
+	    return total;
+    };
+
+    // 配列arrayからランダムにnum個の要素を取り出す
+    function randomSelect(array, num) {
+        let newArray = [];
+
+        while (newArray.length < num && array.length > 0) {
+            // 配列からランダムな要素を選ぶ
+            const rand = Math.floor(Math.random() * array.length);
+            // 選んだ要素を別の配列に登録する
+            newArray.push(array[rand]);
+            // もとの配列からは削除する
+            array.splice(rand, 1);
+        }
+
+        return newArray;
+    }
+    /// ==================== ///
+
+
+
+    // call the saveData function after the experiment is over
+    // ここで保存名を決定
+    /*
+    var info = jsPsych.data.get().select('responses').values;
+    info = JSON.parse(info);
+    let subjid = info.Q0;
+    let setn = info.Q1;
+    let filename = "exp1_id"+subjid+"_set"+setn;
+    */
+
+    // var filename = "test";
+    jsPsych.init({
+        timeline: timeline,
+        // code to define the experiment structure would go here...
+        // on_finish:saveData("experiment_data2",jsPsych.data.get().csv())//function(){saveData("experiment_data", jsPsych.data.get().csv());}
+        on_finish: function () {
+
+            var info = jsPsych.data.get().select('responses').values;
+            info = JSON.parse(info);
+            let subjid = info.Q0;
+            let setn = info.Q1;
+            let filename = "patterntask_v2_L" + String(wmload) + "_id" + subjid + "_set" + setn;
+
+            /*
+            var rts = jsPsych.data.get().select('rt').values;
+            rts = rts.filter(Boolean);
+            rts = rts.slice(2,maxtrials+2);
+            */
+            
+            var keyp = jsPsych.data.get().select('key_press').values;
+            keyp = keyp.filter(Boolean);
+            keyp = keyp.slice(1,maxtrials+1);
+
+            /*
+            var corarray = [];
+            for(var tr = 0;tr<maxtrials;tr++){
+                if(keyp[tr-1]==answ[tr-1]){
+                    corarray.push(1);
+                }else{
+                    corarray.push(0);
+                }
+            }
+            */
+
+            // データの整形 % answrect,rt,interval,patterns
+            var datamatrix = [corarray,rts,intrvls,patterns];
+            var datajson = JSON.stringify(datamatrix);
+
+            var datastr = corarray.toString()+"\n"+rts.toString()+"\n"+patterns.toString(); // CSV形式
+
+            saveData(filename, datastr);
+
+        }
+    });
+
+    
+
+    // 保存名の整理・保存するデータの整理
+
+
+    /*
+    // on_finishを使って書き出す？
+    function saveData() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'write_data.php'); // change 'write_data.php' to point to php script.
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function () {
+            if (xhr.status == 200) {
+                console.log('here5')
+                var response = JSON.parse(xhr.responseText || "null");
+                console.log('here6')
+                console.log(response.success);
+            }
+        };
+        // xhr.send(jsPsych.data.get().json());
+        xhr.send(jsPsych.data.get().select('rt'));
+    }
+    */
+</script>
+
+</html>
