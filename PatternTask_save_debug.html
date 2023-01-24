@@ -45,9 +45,11 @@
     const circler = 30;
     const durFB = 500;
 
-    var maxtrials = 100;  // これは100で固定（変えると下のnratioと噛み合わない）
+    //var maxtrials = 100;  // これは100で固定（変えると下のnratioと噛み合わない）
+    var maxtrials = 5;
     const wmload = 10; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する // TODO: 2, ..., 11でいいのか確認
-    nratio = [10,10,10,10,10,10,10,10,10,10]; // 各刺激を10回ずつで固定にする（全体の試行数を変える）
+    // nratio = [10,10,10,10,10,10,10,10,10,10]; // 各刺激を10回ずつで固定にする（全体の試行数を変える）
+    nratio = [1,1,1,1,1];
 
     let patterns = new Array(maxtrials).fill(1);
     for (var ld = 1; ld<wmload+1; ld++) {
@@ -156,140 +158,6 @@
     timeline.push(survey_trial);
 
 
-/////////////////////////////////////////////////////////////////  PRACTICE  START  ////////////////////////////////////////////////////////////////
-
-    // Practice STARTの表示
-    var trialtext = {
-        obj_type: 'text',
-        content: 'PRACTICE START',
-        startX: cwidth / 2,
-        startY: 80,
-        font: "40px Arial",
-    }
-    var trial = {
-        type: 'psychophysics',
-        stimuli: objectmap.concat(trialtext),
-        choices: jsPsych.NO_KEYS,
-        canvas_width: cwidth,
-        canvas_height: cheight,
-        background_color: bgcol,
-        trial_duration: 3000
-    }
-    timeline.push(trial);
-
-    // 以下繰り返し
-    for (let tr = 1; tr <= answerlist_numbers.length; tr++) {
-        // Practice番号を表示するオブジェクト
-        var trialtext = {
-            obj_type: 'text',
-            content: 'Practice ' + String(tr),
-            startX: cwidth / 2,
-            startY: 80,
-            font: "40px Arial",
-        }
-
-        // map+practice番号
-        var trial = {
-            type: 'psychophysics',
-            stimuli: objectmap.concat(trialtext),
-            choices: jsPsych.NO_KEYS,
-            canvas_width: cwidth,
-            canvas_height: cheight,
-            background_color: bgcol,
-            trial_duration: function(){
-                var ITInow = ITI + Math.random()*ITIwidth;
-                return ITInow;
-            }
-        }
-        timeline.push(trial);
-
-
-        // stim+practice番号
-        // ここでpatternsに応じた座標指定？
-        // 以下修正
-        // その後for文で刺激を呈示していく
-        // sdf,jklは83,68,70,74,75,76（キーコード）
-        var stimcircle = {
-            obj_type: 'circle',
-            startX: cwidth / 2,
-            startY: cheight / 2,
-            radius: circler,
-            line_color: colorlist[tr-1],
-            //line_color: '#c0c0c0',
-            //fill_color: '#c0c0c0'
-            fill_color: colorlist[tr-1]
-        }
-        var trial = {
-            type: 'psychophysics',
-            stimuli: objectmap.concat(trialtext).concat(stimcircle),//stimcircle,//trialtext.concat(stimcircle),
-            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
-            canvas_width: cwidth,
-            canvas_height: cheight,
-            background_color: bgcol,
-            trial_duration: durstim,
-            on_finish: function(){
-                var rtnow = jsPsych.data.get().select('rt').values; // これって無回答の場合はどうなる？ => nullだな
-                // console.log(rtnow[rtnow.length - 1]);
-            }
-        }
-        timeline.push(trial);
-        // timeline.push(stimcircle);
-        // ここの解答をどう扱うか・・・
-        // 次のtimelineのdurationを関数として設定すればいいか？
-        // 上記で既に回答が得られている場合はduration=0とする、という感じで
-
-        // 次に本試行の正解の文字を画面中央に表示
-        var ansletter = {
-            obj_type: 'text',
-            content: answerlist[tr-1],
-            startX: cwidth / 2,
-            startY: cheight / 2,
-            font: "40px Arial",
-        }
-        var trial = {
-            type: 'psychophysics',
-            stimuli: objectmap.concat(trialtext).concat(ansletter),//stimcircle,//trialtext.concat(stimcircle),
-            choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
-            canvas_width: cwidth,
-            canvas_height: cheight,
-            background_color: bgcol,
-            trial_duration: function(){
-                var rtnow = jsPsych.data.get().select('rt').values;
-                rtlast = rtnow[rtnow.length - 1];
-                if(rtlast == null){
-                    // 無回答の場合
-                    return null; // 解答を待つ
-                }else{
-                    return 0;
-                }
-            }, // ここを関数で決定すればよい
-            
-        }
-        timeline.push(trial);
-
-    }
-
-    // Practice END
-    var trialtext = {
-        obj_type: 'text',
-        content: 'PRACTICE END',
-        startX: cwidth / 2,
-        startY: 80,
-        font: "40px Arial",
-    }
-    var trial = {
-        type: 'psychophysics',
-        stimuli: objectmap.concat(trialtext),
-        choices: jsPsych.NO_KEYS,
-        canvas_width: cwidth,
-        canvas_height: cheight,
-        background_color: bgcol,
-        trial_duration: 3000
-    }
-    timeline.push(trial);
-
-
-/////////////////////////////////////////////////////////////  PRACTICE  END  //////////////////////////////////////////////////////////////
 
 
     // STARTの表示
@@ -588,7 +456,7 @@
             info = JSON.parse(info);
             let subjid = info.Q0;
             let setn = info.Q1;
-            let filename = "patterntask_v2_L" + String(wmload) + "_id" + subjid + "_set" + setn;
+            let filename = "patterntask_save_debug_id" + subjid + "_set" + setn;
 
             /*
             var rts = jsPsych.data.get().select('rt').values;
