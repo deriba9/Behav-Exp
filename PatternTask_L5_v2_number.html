@@ -208,7 +208,7 @@
             obj_type: 'text',
             startX: cwidth / 2,
             startY: cheight / 2,
-            content: String(stimlist[tr-1]),
+            content: String(stimlist[tr-1]),  // 数字は順番に表示される方が直感的なので、そのようにします
             font: "40px Arial",
         }
 
@@ -234,7 +234,7 @@
         // 次に本試行の正解の文字を画面中央に表示
         var ansletter = {
             obj_type: 'text',
-            content: answerlist[tr-1],
+            content: answerlist[answeridx[numidx.indexOf(stimlist[tr-1])]],  // 数字に対応する文字を表示してます
             startX: cwidth / 2,
             startY: cheight / 2,
             font: "40px Arial",
