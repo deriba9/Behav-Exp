@@ -65,18 +65,18 @@
     
 
     // patternsに対応する色と回答キーを指定する必要あり
-    let colorlist_numbers = [0,1,2,3,4,5,6,7,8,9,10,11,12]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定
+    let stimlist_numbers = [0,1,2,3,4,5,6,7,8,9]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定
     let answerlist_numbers = [0,1,2,3,4,5,6,7,8,9];  // NOTE: 候補を10個にしました（5個の時は候補が6個になっていた）
     
     // var coloridx = [1,2];
-    let coloridx = randomSelect(colorlist_numbers.slice(), wmload);
+    let numidx = randomSelect(stimlist_numbers.slice(), wmload);
     let answerlist = ['v','s','d','f','g','h','j','k','l','n'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
     let anskeycode = [86,83,68,70,71,72,74,75,76,78];
     // var answeridx = [1,2];
     let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
     
 
-    const colorlist = ['#4169e1','#191970','#00ffff','#5f9ea0','#006400','#00ff7f','#808000','#ffd700','#a0522d','#ff4500','#ff69b4','#ba55d3','#a9a9a9'];
+    const stimlist = [0,1,2,3,4,5,6,7,8,9];  // TODO: 0 - 9 の10個の数字を表示してるが、1 - 10でもいいかも
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
 
@@ -204,24 +204,17 @@
         timeline.push(trial);
 
 
-        // stim+practice番号
-        // ここでpatternsに応じた座標指定？
-        // 以下修正
-        // その後for文で刺激を呈示していく
-        // sdf,jklは83,68,70,74,75,76（キーコード）
-        var stimcircle = {
-            obj_type: 'circle',
+        var stimnumber = {
+            obj_type: 'text',
             startX: cwidth / 2,
             startY: cheight / 2,
-            radius: circler,
-            line_color: colorlist[tr-1],
-            //line_color: '#c0c0c0',
-            //fill_color: '#c0c0c0'
-            fill_color: colorlist[tr-1]
+            content: String(stimlist[tr-1]),  // 数字は順番に表示される方が直感的なので、そのようにします
+            font: "40px Arial",
         }
+
         var trial = {
             type: 'psychophysics',
-            stimuli: objectmap.concat(trialtext).concat(stimcircle),//stimcircle,//trialtext.concat(stimcircle),
+            stimuli: objectmap.concat(trialtext).concat(stimnumber),//stimcircle,//trialtext.concat(stimcircle),
             choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
             canvas_width: cwidth,
             canvas_height: cheight,
@@ -241,7 +234,7 @@
         // 次に本試行の正解の文字を画面中央に表示
         var ansletter = {
             obj_type: 'text',
-            content: answerlist[tr-1],
+            content: answerlist[answeridx[numidx.indexOf(stimlist[tr-1])]],  // 数字に対応する文字を表示してます
             startX: cwidth / 2,
             startY: cheight / 2,
             font: "40px Arial",
@@ -345,20 +338,19 @@
         // ここでpatternsに応じた座標指定？
         // 以下修正
         // その後for文で刺激を呈示していく
-        // sdf,jklは83,68,70,74,75,76（キーコード）
-        var stimcircle = {
-            obj_type: 'circle',
+        // sdf,jklは83,68,70,74,75,76（キーコード）x
+
+        var stimnumber = {
+            obj_type: 'text',
             startX: cwidth / 2,
             startY: cheight / 2,
-            radius: circler,
-            line_color: colorlist[coloridx[patterns[tr-1]-1]],
-            //line_color: '#c0c0c0',
-            //fill_color: '#c0c0c0'
-            fill_color: colorlist[coloridx[patterns[tr-1]-1]]
+            content: String(stimlist[numidx[patterns[tr-1]-1]]),
+            font: "40px Arial",
         }
+
         var trial = {
             type: 'psychophysics',
-            stimuli: objectmap.concat(trialtext).concat(stimcircle),//stimcircle,//trialtext.concat(stimcircle),
+            stimuli: objectmap.concat(trialtext).concat(stimnumber),//stimcircle,//trialtext.concat(stimcircle),
             choices: answerlist,  // NOTE: answerlistと同じかと思ったので、answerlistに置き換えました
             canvas_width: cwidth,
             canvas_height: cheight,
@@ -414,19 +406,16 @@
                 var keynow = jsPsych.data.get().select('key_press').values;
                 // console.log(keynow);
                 // keynow = keynow.filter(Boolean);
-                // NOTE: [(null), space, character]という順にキーストロークがあることを前提に下のような実装にしましたが、キーを２連続押されたりすることに対して脆弱です
-                keynow = [keynow[keynow.length - 3],keynow[keynow.length - 2],keynow[keynow.length - 1]]; // 直近の3つのどちらか
+                keynow = [keynow[keynow.length - 2],keynow[keynow.length - 1]]; // 直近の2つのどちらか
                 var rtnow = jsPsych.data.get().select('rt').values;
-                // NOTE: rtnowはスペースが押された時間を含む情報を、keynowは押された文字（s, f, gなど）を格納しているつもりで以下の実装になっています。
-                if(keynow[0]==null){ // 解答表示中に回答した場合 　// NOTE: keynow = [null, 32, 文字のキーコード]となっていると想定
-                    rtnow = rtnow[rtnow.length - 2] + durstim; // この時点でdurstimを足しておく  // NOTE: space (32) が押されたタイミングを取得
-                    keynow = keynow[2];  // NOTE: 文字コードを取得
-                }else{  // NOTE: keynow = [32, 文字のキーコード, 何らかのキー]となっていると想定
-                    rtnow = rtnow[rtnow.length - 3];  // NOTE: space (32) が押されたタイミングを取得
-                    keynow = keynow[1];  // NOTE: 文字コードを取得
+                if(keynow[0]==null){ // 解答表示中に回答した場合
+                    rtnow = rtnow[rtnow.length - 1] + durstim; // この時点でdurstimを足しておく
+                    keynow = keynow[1];
+                }else{
+                    rtnow = rtnow[rtnow.length - 2];
+                    keynow = keynow[0];
                 }
                 rts.push(rtnow);
-                // TODO: rtnowの理解が合っているのか要確認　
 
                 
                 ansnow = anskeycode[answeridx[patterns[tr-1]-1]];

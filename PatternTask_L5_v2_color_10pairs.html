@@ -65,7 +65,7 @@
     
 
     // patternsに対応する色と回答キーを指定する必要あり
-    let colorlist_numbers = [0,1,2,3,4,5,6,7,8,9,10,11,12]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定
+    let colorlist_numbers = [0,1,2,3,4,5,6,7,8,9]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定  NOTE: 10個にしました
     let answerlist_numbers = [0,1,2,3,4,5,6,7,8,9];  // NOTE: 候補を10個にしました（5個の時は候補が6個になっていた）
     
     // var coloridx = [1,2];
@@ -76,7 +76,7 @@
     let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
     
 
-    const colorlist = ['#4169e1','#191970','#00ffff','#5f9ea0','#006400','#00ff7f','#808000','#ffd700','#a0522d','#ff4500','#ff69b4','#ba55d3','#a9a9a9'];
+    const colorlist = ['#4169e1','#191970','#00ffff','#5f9ea0','#006400','#00ff7f','#808000','#ffd700','#a0522d','#ff4500'];  // NOTE: 右の色を除いて10色にしました,'#ff69b4','#ba55d3','#a9a9a9'
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
 
@@ -214,10 +214,10 @@
             startX: cwidth / 2,
             startY: cheight / 2,
             radius: circler,
-            line_color: colorlist[tr-1],
+            line_color: colorlist[coloridx[tr-1]],
             //line_color: '#c0c0c0',
             //fill_color: '#c0c0c0'
-            fill_color: colorlist[tr-1]
+            fill_color: colorlist[coloridx[tr-1]]
         }
         var trial = {
             type: 'psychophysics',
@@ -241,7 +241,7 @@
         // 次に本試行の正解の文字を画面中央に表示
         var ansletter = {
             obj_type: 'text',
-            content: answerlist[tr-1],
+            content: answerlist[answeridx[tr-1]],
             startX: cwidth / 2,
             startY: cheight / 2,
             font: "40px Arial",
