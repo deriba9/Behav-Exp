@@ -48,9 +48,9 @@
     const circler = 30;
     const durFB = 500;
 
-    var maxtrials = 50;  // これは50で固定（変えると下のnratioと噛み合わない）
-    const wmload = 10; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する
-    nratio = [5,5,5,5,5,5,5,5,5,5]; // 各刺激を5回ずつで固定にする（全体の試行数を変える）
+    var maxtrials = 20;  // これは25で固定（変えると下のnratioと噛み合わない）
+    const wmload = 4; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する
+    nratio = [5,5,5,5]; // 各刺激を5回ずつで固定にする（全体の試行数を変える）
 
     let patterns = new Array(maxtrials).fill(1);
     for (var ld = 1; ld<wmload+1; ld++) {
@@ -68,24 +68,25 @@
     
 
     // patternsに対応する色と回答キーを指定する必要あり
-    let stimlist_numbers = [0,1,2,3,4,5,6,7,8,9]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定  NOTE: 5個にしました
-    let answerlist_numbers = [0,1,2,3,4,5,6,7,8,9];  // NOTE: 候補を5個にしました（5個の時は候補が6個になっていた）
+    let stimlist_numbers = [0,1,2,3]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定  NOTE: 5個にしました
+    let answerlist_numbers = [0,1,2,3];  // NOTE: 候補を5個にしました（5個の時は候補が6個になっていた）
     
     // var coloridx = [1,2];
     // let numidx = randomSelect(stimlist_numbers.slice(), wmload);
-    let numidx = [8,4,2,1,6,7,1,3,0,5,9]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
+    let numidx = [2,0,3,1]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
 
-    let answerlist = ['v','s','d','f','g','h','j','k','l','n'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
-    let anskeycode = [86,83,68,70,71,72,74,75,76,78];
+    let answerlist = ['d','f','j','k'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
+    let anskeycode = [68,70,74,75];
     // var answeridx = [1,2];
     // let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
-    let answeridx = [0,1,2,3,4,5,6,7,8,9]; // これもURLごとに手動で並べ替えて定義しておく?
+    let answeridx = [0,1,2,3]; // これもURLごとに手動で並べ替えて定義しておく?
 
     // const stimlist = [0,1,2,3,4];
     // const stimlist = [10,11,12,13,14];
     
     // 以下をURLごとに手動で書き換える（被らないように）
-    const stimlist = [31,45,55,80,37,39,59,38,84,60];
+    // const stimlist = [32,96,97,76,47];
+    const stimlist = [37,19,21,42];
 
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
@@ -151,7 +152,7 @@
     // まずタイトル
     var titleobj = {
         type: 'html-keyboard-response',
-        stimulus: '<p>Load 10 Condition</p><p>Press "]" key to start</p>',
+        stimulus: '<p>Load 5 Condition</p><p>Press "]" key to start</p>',
         choices: ']'
     }
     timeline.push(titleobj);
@@ -592,7 +593,7 @@
             let subjid = info.Q0;
             // let setn = info.Q1;
             // let filename = "patterntask_number" + String(wmload) + "_id" + subjid + "_set" + setn;
-            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL5";
+            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL8";
 
             /*
             var rts = jsPsych.data.get().select('rt').values;

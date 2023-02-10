@@ -73,7 +73,7 @@
     
     // var coloridx = [1,2];
     // let numidx = randomSelect(stimlist_numbers.slice(), wmload);
-    let numidx = [2,3,1,0]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
+    let numidx = [2,0,3,1]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
 
     let answerlist = ['d','f','j','k'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
     let anskeycode = [68,70,74,75];
@@ -85,8 +85,8 @@
     // const stimlist = [10,11,12,13,14];
     
     // 以下をURLごとに手動で書き換える（被らないように）
-    // const stimlist = [52,13,79,21,22];
-    const stimlist = [15,92,57,96];
+    // const stimlist = [32,96,97,76,47];
+    const stimlist = [82,90,18,50];
 
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
@@ -593,7 +593,7 @@
             let subjid = info.Q0;
             // let setn = info.Q1;
             // let filename = "patterntask_number" + String(wmload) + "_id" + subjid + "_set" + setn;
-            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL4";
+            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL7";
 
             /*
             var rts = jsPsych.data.get().select('rt').values;
