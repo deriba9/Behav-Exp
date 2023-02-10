@@ -24,6 +24,8 @@
 </body>
 
 <script>
+    // For Practice
+    
     // パターン学習課題
     // wmloadで指定した「色と回答の組み合わせ」を学習していく
     // 回答キーについて：使用キーはs,d,f,j,k,lの6種
@@ -42,6 +44,7 @@
     const ITI = 500; // 最小のITI
     const ITIwidth = 1000; // ITIのランダム幅
     const durstim = 3000; // 色刺激が出る時間の長さ
+    const durstimprac = 1500;
     const circler = 30;
     const durFB = 500;
 
@@ -54,7 +57,7 @@
         patterns.fill(ld,sumarray(nratio.slice(0,ld-1)));
     }
 
-    for (var j = 1; j < maxtrials; j++) {  // NOTE: 元々100という値が置かれていましたが、maxtrialsのことかと思ったので置き換えました
+    for (var j = 1; j < 100; j++) { 
         for (var i = patterns.length - 1; i > 0; i--) { // 配列のランダマイズ => 全然できてない感がある // TODO: これ修正されているのか確認
             var r = Math.floor(Math.random() * (i + 1));
             var tmp = patterns[i];
@@ -69,14 +72,21 @@
     let answerlist_numbers = [0,1,2,3,4];  // NOTE: 候補を5個にしました（5個の時は候補が6個になっていた）
     
     // var coloridx = [1,2];
-    let numidx = randomSelect(stimlist_numbers.slice(), wmload);
+    // let numidx = randomSelect(stimlist_numbers.slice(), wmload);
+    let numidx = [3,4,0,2,1]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
+
     let answerlist = ['s','d','f','j','k'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
     let anskeycode = [83,68,70,74,75];
     // var answeridx = [1,2];
-    let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
-    
+    // let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
+    let answeridx = [0,1,2,3,4]; // これもURLごとに手動で並べ替えて定義しておく?
 
-    const stimlist = [0,1,2,3,4];
+    // const stimlist = [0,1,2,3,4];
+    // const stimlist = [10,11,12,13,14];
+    
+    // 以下をURLごとに手動で書き換える（被らないように）
+    const stimlist = [52,13,79,21,22];
+
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
 
@@ -141,7 +151,7 @@
     // まずタイトル
     var titleobj = {
         type: 'html-keyboard-response',
-        stimulus: '<p>Experiment</p><p>Press "]" key to start</p>',
+        stimulus: '<p>Load 5 Condition</p><p>Press "]" key to start</p>',
         choices: ']'
     }
     timeline.push(titleobj);
@@ -150,7 +160,7 @@
         type: 'survey-text',
         questions: [
             { prompt: "ID : " },
-            { prompt: "Set : ", placeholder: "If this is practice, input 0" }
+            // { prompt: "Set : ", placeholder: "If this is practice, input 0" }
         ],
     };
     timeline.push(survey_trial);
@@ -208,7 +218,7 @@
             obj_type: 'text',
             startX: cwidth / 2,
             startY: cheight / 2,
-            content: String(stimlist[tr-1]),  // 数字は順番に表示される方が直感的なので、そのようにします
+            content: String(stimlist[tr-1]),
             font: "40px Arial",
         }
 
@@ -219,7 +229,7 @@
             canvas_width: cwidth,
             canvas_height: cheight,
             background_color: bgcol,
-            trial_duration: durstim,
+            trial_duration: durstimprac,
             on_finish: function(){
                 var rtnow = jsPsych.data.get().select('rt').values; // これって無回答の場合はどうなる？ => nullだな
                 // console.log(rtnow[rtnow.length - 1]);
@@ -234,7 +244,8 @@
         // 次に本試行の正解の文字を画面中央に表示
         var ansletter = {
             obj_type: 'text',
-            content: answerlist[answeridx[numidx.indexOf(stimlist[tr-1])]],  // 数字に対応する文字を表示してます
+            // content: answerlist[answeridx[numidx.indexOf(stimlist[tr-1])]],  // 数字に対応する文字を表示してます
+            content: answerlist[numidx[tr-1]],  // 数字に対応する文字を表示してます
             startX: cwidth / 2,
             startY: cheight / 2,
             font: "40px Arial",
@@ -253,7 +264,7 @@
                     // 無回答の場合
                     return null; // 解答を待つ
                 }else{
-                    return 0;
+                    return 1000;
                 }
             }, // ここを関数で決定すればよい
             
@@ -344,7 +355,7 @@
             obj_type: 'text',
             startX: cwidth / 2,
             startY: cheight / 2,
-            content: String(stimlist[numidx[patterns[tr-1]-1]]),
+            content: String(stimlist[patterns[tr-1]-1]),
             font: "40px Arial",
         }
 
@@ -370,7 +381,7 @@
         // 次に本試行の正解の文字を画面中央に表示
         var ansletter = {
             obj_type: 'text',
-            content: answerlist[answeridx[patterns[tr-1]-1]],
+            content: answerlist[numidx[patterns[tr-1]-1]],
             startX: cwidth / 2,
             startY: cheight / 2,
             font: "40px Arial",
@@ -418,7 +429,7 @@
                 rts.push(rtnow);
 
                 
-                ansnow = anskeycode[answeridx[patterns[tr-1]-1]];
+                ansnow = anskeycode[numidx[patterns[tr-1]-1]];
                 if (ansnow == keynow){
                     cornow = 1;
                     txcol = '#0000ff';
@@ -432,7 +443,7 @@
                 }
                 var FBletter = {
                     obj_type: 'text',
-                    content: answerlist[answeridx[patterns[tr-1]-1]],
+                    content: answerlist[numidx[patterns[tr-1]-1]],
                     startX: cwidth / 2,
                     startY: cheight / 2,
                     font: "40px Arial",
@@ -579,8 +590,9 @@
             var info = jsPsych.data.get().select('responses').values;
             info = JSON.parse(info);
             let subjid = info.Q0;
-            let setn = info.Q1;
-            let filename = "patterntask_number" + String(wmload) + "_id" + subjid + "_set" + setn;
+            // let setn = info.Q1;
+            // let filename = "patterntask_number" + String(wmload) + "_id" + subjid + "_set" + setn;
+            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL4";
 
             /*
             var rts = jsPsych.data.get().select('rt').values;
