@@ -48,9 +48,9 @@
     const circler = 30;
     const durFB = 500;
 
-    var maxtrials = 25;  // これは25で固定（変えると下のnratioと噛み合わない）
-    const wmload = 5; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する
-    nratio = [5,5,5,5,5]; // 各刺激を5回ずつで固定にする（全体の試行数を変える）
+    var maxtrials = 20;  // これは25で固定（変えると下のnratioと噛み合わない）
+    const wmload = 4; // 2,3,4,5,6,7,8,9,10,11の10パターンとしておく // 書き換えず、ファイルを変更する
+    nratio = [5,5,5,5]; // 各刺激を5回ずつで固定にする（全体の試行数を変える）
 
     let patterns = new Array(maxtrials).fill(1);
     for (var ld = 1; ld<wmload+1; ld++) {
@@ -68,24 +68,25 @@
     
 
     // patternsに対応する色と回答キーを指定する必要あり
-    let stimlist_numbers = [0,1,2,3,4]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定  NOTE: 5個にしました
-    let answerlist_numbers = [0,1,2,3,4];  // NOTE: 候補を5個にしました（5個の時は候補が6個になっていた）
+    let stimlist_numbers = [0,1,2,3]; // wmloadの数分色を指定 -> 13種の内wmload個をランダムな順番で指定  NOTE: 5個にしました
+    let answerlist_numbers = [0,1,2,3];  // NOTE: 候補を5個にしました（5個の時は候補が6個になっていた）
     
     // var coloridx = [1,2];
     // let numidx = randomSelect(stimlist_numbers.slice(), wmload);
-    let numidx = [4,3,1,0,2]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
+    let numidx = [3,1,2,0]; // これを規定しておく。これは、数字と文字の対応づけを意味する。
 
-    let answerlist = ['s','d','f','j','k'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
-    let anskeycode = [83,68,70,74,75];
+    let answerlist = ['d','f','j','k'];  //NOTE: ';'がうまくいかなかったので、'a'と';'を追加するのをやめました
+    let anskeycode = [68,70,74,75];
     // var answeridx = [1,2];
     // let answeridx = randomSelect(answerlist_numbers.slice(),wmload); // これ数字に直そう、1-6で
-    let answeridx = [0,1,2,3,4]; // これもURLごとに手動で並べ替えて定義しておく?
+    let answeridx = [0,1,2,3]; // これもURLごとに手動で並べ替えて定義しておく?
 
     // const stimlist = [0,1,2,3,4];
     // const stimlist = [10,11,12,13,14];
     
     // 以下をURLごとに手動で書き換える（被らないように）
-    const stimlist = [72,35,94,17,26];
+    // const stimlist = [15, 14, 63, 29, 67];
+    const stimlist = [15, 14, 63, 29];
 
     // これ動作する？ // 14種の色
     // colorlist[coloridx(patterns(tr))]
@@ -592,7 +593,7 @@
             let subjid = info.Q0;
             // let setn = info.Q1;
             // let filename = "patterntask_number" + String(wmload) + "_id" + subjid + "_set" + setn;
-            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL2";
+            let filename = "MemoryAthlete_load" + String(wmload) + "_id" + subjid + "_URL0";
 
             /*
             var rts = jsPsych.data.get().select('rt').values;
